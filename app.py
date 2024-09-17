@@ -37,7 +37,7 @@ def weather_plot(data, column):
   ax.scatter(data['year'], data[column], s=60, color=color)
 
   ax.set_xlabel('Year')
-  ax.set_ylabel(f"{str(column).replace("_", " ").title()}")
+  ax.set_ylabel(f"{str(column).replace('_', ' ').title()}")
   ax.set_title(f'Scatter Plot of Mean {str(column).replace("_", " ").title()} by Year')
 
   # Customize the grid and ticks
