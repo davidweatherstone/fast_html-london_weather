@@ -38,7 +38,8 @@ tweaked_df = tweak_dataframe(df)
 
 # Initialize with default values
 selected_column = tweaked_df.columns[1]
-selected_year = tweaked_df['year'].min()
+selected_start_year = tweaked_df['year'].min()
+selected_end_year = tweaked_df['year'].max()
 cols = tweaked_df.columns[1:]
 
 # Plotting functions
@@ -49,13 +50,15 @@ def altair_weather_plot(data, column):
 
    chart = alt.Chart(data, title=title).mark_point(color=color).encode(
         alt.X("year:O").title("Year"),
-        alt.Y(f"{column}:Q").title(col_name)
+        alt.Y(f"{column}:Q").title(col_name),
+        alt.Tooltip(f"{column}:Q", format=".2f")
         ).properties(width=400, height=200
         ).add_params(alt.selection_interval())
    
    bars = alt.Chart(data).mark_bar(color=color).encode(
         alt.Y("year:O").title("Year"),
-        alt.X(f"{column}:Q").title(col_name)
+        alt.X(f"{column}:Q").title(col_name),
+        alt.Tooltip(f"{column}:Q", format=".2f")
         ).properties(width=400, height=200
         ).add_params(alt.selection_interval())
    
@@ -113,16 +116,22 @@ def get():
 # Altair
 @app.get("/altair")
 def altair():
-  global selected_year
+  global selected_start_year, selected_end_year
   plot = altair_weather_plot(tweaked_df, selected_column)
   column_select = Select(*[Option(str(col).replace("_", " ").title(), value=col) for col in cols], 
                          name="column_btns", form="filter-form")
 
-  year_slider = Input(type="range",
-                     name="year_range",
+  year_start_slider = Input(type="range",
+                     name="year_start_range",
                      min=tweaked_df['year'].min(),
                      max=tweaked_df['year'].max(),
-                     value=selected_year)
+                     value=selected_start_year)
+  
+  year_end_slider = Input(type="range",
+                     name="year_end_range",
+                     min=tweaked_df['year'].min(),
+                     max=tweaked_df['year'].max(),
+                     value=selected_end_year)
   
   return Title("London Weather Data, Altair"), Main(
     Body(
@@ -137,8 +146,12 @@ def altair():
                   Div(column_select),
                   P("Select Start Year", 
                   cls="subheading"),
-                  Div(year_slider),
-                  P(selected_year, cls="heading-tertiary", id="selected-year"),
+                  Div(year_start_slider),
+                  P(selected_start_year, cls="heading-tertiary", id="selected-start-year"),
+                  P("Select End Year", 
+                  cls="subheading"),
+                  Div(year_end_slider),
+                  P(selected_end_year, cls="heading-tertiary", id="selected-end-year"),
                   id="filter-form", hx_trigger="input", hx_post="/update_altair_filters", hx_target="#chart", hx_swap="innerHTML",
               cls="filter-pane"
               )
@@ -160,13 +173,14 @@ def altair():
 
 @app.post("/update_altair_filters")
 def update_altair_filters(data: dict):
-    global selected_column, selected_year
+    global selected_column, selected_start_year
 
     selected_column = data["column_btns"]
-    selected_year = int(data["year_range"])
+    selected_start_year = int(data["year_start_range"])
+    selected_end_year = int(data["year_end_range"])
 
-    filtered_df = tweaked_df.filter(pl.col("year") >= selected_year)
-
+    filtered_df = tweaked_df.filter(pl.col("year") >= selected_start_year).filter(pl.col("year") <= selected_end_year)
+    print(data)
     # Create updated plot
     updated_plot = altair_weather_plot(filtered_df, selected_column)
     
@@ -179,22 +193,23 @@ def update_altair_filters(data: dict):
                 updated_plot,
                 id="chart"
               ),
-              P(selected_year, cls="heading-tertiary", id="selected-year", hx_swap_oob="true")
+              P(selected_start_year, cls="heading-tertiary", id="selected-start-year", hx_swap_oob="true"),
+              P(selected_end_year, cls="heading-tertiary", id="selected-end-year", hx_swap_oob="true")
     )
 
 # MPL
 @app.get("/matplotlib")
 def matplotlib():
-  global selected_year
+  global selected_start_year
   plot = mpl_weather_plot(tweaked_df, selected_column)
   column_select = Select(*[Option(str(col).replace("_", " ").title(), value=col) for col in cols], 
                          name="column_btns", form="filter-form")
 
-  year_slider = Input(type="range",
+  year_start_slider = Input(type="range",
                      name="year_range",
                      min=tweaked_df['year'].min(),
                      max=tweaked_df['year'].max(),
-                     value=selected_year)
+                     value=selected_start_year)
   
   return Title("London Weather Data, Matplotlib"), Main(
     Body(
@@ -210,8 +225,8 @@ def matplotlib():
                   Div(column_select),
                   P("Select Start Year", 
                   cls="subheading"),
-                  Div(year_slider),
-                  P(selected_year, cls="heading-tertiary", id="selected-year"),
+                  Div(year_start_slider),
+                  P(selected_start_year, cls="heading-tertiary", id="selected-year"),
                   id="filter-form", hx_trigger="input", hx_post="/update_mpl_filters", hx_target="#chart", hx_swap="innerHTML",
               cls="filter-pane"
               )
@@ -233,12 +248,12 @@ def matplotlib():
 
 @app.post("/update_mpl_filters")
 def update_mpl_filters(data: dict):
-    global selected_column, selected_year
+    global selected_column, selected_start_year
 
     selected_column = data["column_btns"]
-    selected_year = int(data["year_range"])
+    selected_start_year = int(data["year_range"])
 
-    filtered_df = tweaked_df.filter(pl.col("year") >= selected_year)
+    filtered_df = tweaked_df.filter(pl.col("year") >= selected_start_year)
 
     # Create updated plot
     updated_plot = mpl_weather_plot(filtered_df, selected_column)
@@ -253,22 +268,22 @@ def update_mpl_filters(data: dict):
                     id="chart",
                     cls=""
                   ),
-              P(selected_year, cls="heading-tertiary", id="selected-year", hx_swap_oob="true")
+              P(selected_start_year, cls="heading-tertiary", id="selected-year", hx_swap_oob="true")
     )
 
 # Plotly
 @app.get("/plotly")
 def plotly():
-  global selected_year
+  global selected_start_year
   plot = plotly_weather_plot(tweaked_df, selected_column)
   column_select = Select(*[Option(str(col).replace("_", " ").title(), value=col) for col in cols], 
                          name="column_btns", form="filter-form")
 
-  year_slider = Input(type="range",
+  year_start_slider = Input(type="range",
                      name="year_range",
                      min=tweaked_df['year'].min(),
                      max=tweaked_df['year'].max(),
-                     value=selected_year)
+                     value=selected_start_year)
   
   return Title("London Weather Data, Plotly"), Main(
     Body(
@@ -283,8 +298,8 @@ def plotly():
                   Div(column_select),
                   P("Select Start Year", 
                   cls="subheading"),
-                  Div(year_slider),
-                  P(selected_year, cls="heading-tertiary", id="selected-year"),
+                  Div(year_start_slider),
+                  P(selected_start_year, cls="heading-tertiary", id="selected-year"),
                   id="filter-form", hx_trigger="input", hx_post="/update_plotly_filters", hx_target="#chart", hx_swap="innerHTML",
               cls="filter-pane"
               )
@@ -307,12 +322,12 @@ def plotly():
 
 @app.post("/update_plotly_filters")
 def update_plotly_filters(data: dict):
-    global selected_column, selected_year
+    global selected_column, selected_start_year
 
     selected_column = data["column_btns"]
-    selected_year = int(data["year_range"])
+    selected_start_year = int(data["year_range"])
 
-    filtered_df = tweaked_df.filter(pl.col("year") >= selected_year)
+    filtered_df = tweaked_df.filter(pl.col("year") >= selected_start_year)
 
     # Create updated plot
     updated_plot = plotly_weather_plot(filtered_df, selected_column)
@@ -327,7 +342,7 @@ def update_plotly_filters(data: dict):
                 Script(f"var data = {updated_plot}; Plotly.newPlot('myDiv', data);"),
                 id="chart"
               ),
-              P(selected_year, cls="heading-tertiary", id="selected-year", hx_swap_oob="true")
+              P(selected_start_year, cls="heading-tertiary", id="selected-year", hx_swap_oob="true")
     )
 
 
