@@ -1,0 +1,15 @@
+fh_matplotlib-0.0.4.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+fh_matplotlib-0.0.4.dist-info/LICENSE,sha256=_4lHqmvCF2XPO1R0fX63Z2E7d4vAU1eAXPqQtBYI9i0,1077
+fh_matplotlib-0.0.4.dist-info/METADATA,sha256=ebY1e4Nm7nbDEcnVPnSjO51HrUsMZB-n4uDENqy_YjA,2299
+fh_matplotlib-0.0.4.dist-info/RECORD,,
+fh_matplotlib-0.0.4.dist-info/REQUESTED,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+fh_matplotlib-0.0.4.dist-info/WHEEL,sha256=DZajD4pwLWue70CAfc7YaxT1wLUciNBvN_TTcvXpltE,110
+fh_matplotlib-0.0.4.dist-info/top_level.txt,sha256=rtqfjk2JujIYGOMfS2xWVTOygXZQRsrKs7siy7IrtiM,20
+fh_matplotlib/__init__.py,sha256=_wrZkQLPOB0dK_FyDDeD5EFk-HSTQdJnAyoKtYnKgxY,1400
+fh_matplotlib/__pycache__/__init__.cpython-312.pyc,,
+tests/__init__.py,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
+tests/__pycache__/__init__.cpython-312.pyc,,
+tests/__pycache__/test_basics.cpython-312.pyc,,
+tests/__pycache__/test_clicker.cpython-312.pyc,,
+tests/test_basics.py,sha256=b-ox_rHz-Q8v6ZoaBrCpgAprf1dfiv2Ajx2HWEdfsT0,316
+tests/test_clicker.py,sha256=EApIZ7an5to3B8N2boGAcHS1s_qCo6UAzRNVRBtHcD0,1240
